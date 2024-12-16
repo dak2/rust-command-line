@@ -24,7 +24,7 @@
 				"rust-analyzer.checkOnSave.command": "clippy"
 			},
 			"extensions": [
-				"rust-lang.rust-analyzer",
+				// "rust-lang.rust-analyzer",
 				"GitHub.copilot-nightly",
 				"GitHub.copilot-labs"
 			]

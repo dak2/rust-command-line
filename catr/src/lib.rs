@@ -9,10 +9,21 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         match open(&filename) {
             Err(err) => eprintln!("Failed to open {}: {}", filename, err),
-            Ok(_) => eprintln!("Opened {}", filename),
+            Ok(_) => {
+                let lines = read_lines(open(&filename)?)?;
+                eprintln!("Opened {}: {}", filename, lines.join("\n"));
+            }
         }
     }
     Ok(())
+}
+
+pub fn read_lines<T: BufRead>(reader: T) -> MyResult<Vec<String>> {
+    let mut lines = Vec::new();
+    for line in reader.lines() {
+        lines.push(line?);
+    }
+    Ok(lines)
 }
 
 // Store the heap memory pointer to the stack memory, because the dyn Error does not know size of retrun value

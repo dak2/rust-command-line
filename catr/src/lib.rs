@@ -11,7 +11,17 @@ pub fn run(config: Config) -> MyResult<()> {
             Err(err) => eprintln!("Failed to open {}: {}", filename, err),
             Ok(file) => {
                 let lines = read_lines(BufReader::new(file))?;
-                if config.number_lines {
+                if config.number_nonblank_lines {
+                    let mut line_number = 1;
+                    for line in lines.iter() {
+                        if !line.trim().is_empty() {
+                            println!("{:>6}\t{}", line_number, line);
+                            line_number += 1;
+                        } else {
+                            println!();
+                        }
+                    }
+                } else if config.number_lines {
                     for (i, line) in lines.iter().enumerate() {
                         println!("{:>6}\t{}", i + 1, line);
                     }

@@ -9,9 +9,15 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         match open(&filename) {
             Err(err) => eprintln!("Failed to open {}: {}", filename, err),
-            Ok(_) => {
-                let lines = read_lines(open(&filename)?)?;
-                eprintln!("Opened {}: {}", filename, lines.join("\n"));
+            Ok(file) => {
+                let lines = read_lines(BufReader::new(file))?;
+                if config.number_lines {
+                    for (i, line) in lines.iter().enumerate() {
+                        println!("{:>6}\t{}", i + 1, line);
+                    }
+                } else {
+                    eprintln!("Opened {}", lines.join("\n"));
+                }
             }
         }
     }

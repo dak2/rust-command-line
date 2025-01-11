@@ -26,7 +26,12 @@ pub fn run(config: Config) -> MyResult<()> {
                         println!("{:>6}\t{}", i + 1, line);
                     }
                 } else {
-                    eprintln!("Opened {}", lines.join("\n"));
+                    let output = lines.join("\n");
+                    if !output.is_empty() {
+                        println!("{}", output);
+                    } else {
+                        print!("");
+                    }
                 }
             }
         }

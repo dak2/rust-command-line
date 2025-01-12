@@ -32,14 +32,25 @@ pub fn get_args() -> MyResult<Config> {
               .short("c")
               .long("bytes")
               .help("Number of bytes")
-              .takes_value(false),
+              .takes_value(false)
+              .conflicts_with("lines")
       )
       .get_matches();
 
+    let lines = matches.value_of("lines")
+        .map(parse_positive_int)
+        .transpose()
+        .map_err(|e| format!("illegal line count -- : {}", e))?;
+
+    let bytes = matches.value_of("bytes")
+        .map(parse_positive_int)
+        .transpose()
+        .map_err(|e| format!("illegal byte count -- : {}", e))?;
+
     Ok(Config {
       files: matches.values_of_lossy("files").unwrap(),
-      lines: matches.value_of("lines").map(|v| v.parse::<usize>().unwrap()).unwrap_or(10), // Default to 10 lines if not provided
-      bytes: matches.value_of("bytes").map(|v| v.parse::<usize>().unwrap()),
+      lines: lines.unwrap(),
+      bytes,
     })
 }
 

@@ -70,8 +70,7 @@ fn dies_bad_lines() -> Result<()> {
 // --------------------------------------------------
 #[test]
 fn dies_bytes_and_lines() -> Result<()> {
-    let msg = "the argument '--lines <LINES>' cannot be \
-               used with '--bytes <BYTES>'";
+    let msg = "The argument '--lines' cannot be used with '--bytes'";
 
     Command::cargo_bin(PRG)?
         .args(["-n", "1", "-c", "2"])

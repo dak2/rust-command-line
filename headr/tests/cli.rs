@@ -37,7 +37,7 @@ fn gen_bad_file() -> String {
 fn dies_bad_bytes() -> Result<()> {
     let bad = random_string();
     let expected = format!(
-        "invalid value '{bad}' for \
+        "error: invalid value '{bad}' for \
         '--bytes <BYTES>': invalid digit found in string"
     );
 
@@ -70,7 +70,7 @@ fn dies_bad_lines() -> Result<()> {
 // --------------------------------------------------
 #[test]
 fn dies_bytes_and_lines() -> Result<()> {
-    let msg = "The argument '--lines' cannot be used with '--bytes'";
+    let msg = "error: The argument \'--lines <lines>\' cannot be used with \'--bytes <bytes>\'";
 
     Command::cargo_bin(PRG)?
         .args(["-n", "1", "-c", "2"])

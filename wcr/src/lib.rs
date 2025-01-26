@@ -8,14 +8,19 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 pub fn run(config: Config) -> MyResult<()> {
   for filename in &config.files {
     match open(filename) {
-      Err(err) => eprintln!("Failed to open {}: {}", filename, err),
+      Err(err) => eprintln!("{}: {}", filename, err),
       Ok(file) => {
         if let Ok(info) = count(file) {
-          println!("{:>8}{:>8}{:>8} {}",
-            info.num_lines,
-            info.num_words,
-            info.num_bytes,
-            filename
+          println!("{}{}{}{}{}",
+            format_field(info.num_lines, config.lines),
+            format_field(info.num_words, config.words),
+            format_field(info.num_bytes, config.bytes),
+            format_field(info.num_chars, config.chars),
+            if filename == "-" {
+              "".to_string()
+            } else {
+              format!(" {}", filename)
+            }
           );
         }
       }
@@ -108,6 +113,14 @@ pub fn get_args() -> MyResult<Config> {
   gen_config(files, lines, words, bytes, chars)
 }
 
+fn format_field(value: usize, show: bool) -> String {
+  if show {
+    format!("{:>8}", value)
+  } else {
+   "".to_string()
+  }
+}
+
 fn gen_config(
   files: Vec<String>,
   mut lines: bool,
@@ -150,7 +163,7 @@ pub struct FileInfo {
 
 #[cfg(test)]
 mod tests {
-  use super::{count, FileInfo};
+  use super::{count, format_field, FileInfo};
   use std::io::Cursor;
 
   #[test]
@@ -166,4 +179,12 @@ mod tests {
     };
     assert_eq!(info.unwrap(), expected);
   }
+
+  #[test]
+  fn test_format_field() {
+    assert_eq!(format_field(1, false), "");
+    assert_eq!(format_field(3, true), "       3");
+    assert_eq!(format_field(10, true), "      10");
+  }
+
 }

@@ -1,5 +1,10 @@
 use clap::{App, Arg};
-use std::error::Error;
+use std::{
+  error::Error,
+  fs::File,
+  io::{self, BufRead, BufReader},
+};
+use std::collections::HashMap;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -46,7 +51,34 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
+pub fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+  match filename {
+      "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+      _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+  }
+}
+
 pub fn run(config: Config) -> MyResult<()> {
-  println!("{:?}", config);
+  let mut file = open(&config.in_file).map_err(|e| format!("{}: {}", config.in_file, e))?;
+  let mut line = String::new();
+
+  loop {
+    let bytes = file.read_line(&mut line)?;
+    if bytes == 0 {
+      break;
+    }
+    let trimmed_line = line.trim().to_string();
+    *frequencies.entry(trimmed_line).or_insert(0) += 1;
+    line.clear();
+  }
+
+  for (string, count) in frequencies.iter() {
+    if config.count {
+      println!("{:4} {}", count, string);
+    } else {
+      println!("{}", string);
+    }
+  }
+
   Ok(())
 }

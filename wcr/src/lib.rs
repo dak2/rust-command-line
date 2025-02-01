@@ -6,6 +6,11 @@ use std::io::{self, BufRead, BufReader};
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
+  let mut total_lines = 0;
+  let mut total_words = 0;
+  let mut total_bytes = 0;
+  let mut total_chars = 0;
+
   for filename in &config.files {
     match open(filename) {
       Err(err) => eprintln!("{}: {}", filename, err),
@@ -22,9 +27,24 @@ pub fn run(config: Config) -> MyResult<()> {
               format!(" {}", filename)
             }
           );
+
+          total_lines += info.num_lines;
+          total_words += info.num_words;
+          total_bytes += info.num_bytes;
+          total_chars += info.num_chars;
         }
       }
     }
+  }
+
+  if config.files.len() > 1 {
+    println!(
+      "{}{}{}{} total",
+      format_field(total_lines, config.lines),
+      format_field(total_words, config.words),
+      format_field(total_bytes, config.bytes),
+      format_field(total_chars, config.chars)
+    )
   }
 
   Ok(())
@@ -59,8 +79,8 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
   Ok(FileInfo {
     num_lines,
     num_words,
-    num_chars,
     num_bytes,
+    num_chars,
   })
 }
 
@@ -79,18 +99,21 @@ pub fn get_args() -> MyResult<Config> {
     .arg(
       Arg::with_name("lines")
         .short("l")
+        .long("lines")
         .help("Show line count")
         .takes_value(false)
     )
     .arg(
       Arg::with_name("words")
         .short("w")
+        .long("words")
         .help("Show word count")
         .takes_value(false)
     )
     .arg(
       Arg::with_name("chars")
         .short("m")
+        .long("chars")
         .help("Show character count")
         .takes_value(false)
         .conflicts_with("bytes"),
@@ -98,9 +121,9 @@ pub fn get_args() -> MyResult<Config> {
     .arg(
       Arg::with_name("bytes")
         .short("c")
+        .long("bytes")
         .help("Show byte count")
         .takes_value(false)
-        .conflicts_with("chars"),
     )
     .get_matches();
 
